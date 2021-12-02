@@ -3,6 +3,7 @@ package routes
 import (
 	"github.com/tonnytg/viewerlight/entity/products"
 	"html/template"
+	"log"
 	"net/http"
 )
 
@@ -16,11 +17,16 @@ func CallRoutes() {
 
 // Index is the main page
 func Index(w http.ResponseWriter, r *http.Request) {
-	product := products.Product{ID: 1, Name: "test", Description: "test", Price: 1}
-	p, err := products.Create(product)
+
+	product1 := products.Product{ID: 1, Name: "test1", Description: "test1", Price: 1}
+	product2 := products.Product{ID: 2, Name: "test2", Description: "test2", Price: 2}
+	product3 := products.Product{ID: 3, Name: "test3", Description: "test3", Price: 3}
+
+	sliceProducts := []products.Product{product1, product2, product3}
+
+	err := tmpl.ExecuteTemplate(w, "index.html", sliceProducts)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("Error executing t: %v", err)
         return
-	}
-	tmpl.ExecuteTemplate(w, "index.html", p)
+    }
 }

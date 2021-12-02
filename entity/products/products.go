@@ -6,7 +6,3 @@ type Product struct {
     Description string `json:"description"`
     Price       int64  `json:"price"`
 }
-
-func Create(p Product) (Product, error) {
-    return p, nil
-}
