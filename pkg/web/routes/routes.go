@@ -18,9 +18,9 @@ func CallRoutes() {
 // Index is the main page
 func Index(w http.ResponseWriter, r *http.Request) {
 
-	product1 := products.Product{ID: 1, Name: "test1", Description: "test1", Price: 1}
-	product2 := products.Product{ID: 2, Name: "test2", Description: "test2", Price: 2}
-	product3 := products.Product{ID: 3, Name: "test3", Description: "test3", Price: 3}
+	product1 := products.Product{ID: 1, Name: "test1", Description: "test1", Price: 1, Actions: []string{"Buy", "Sell"}}
+	product2 := products.Product{ID: 2, Name: "test2", Description: "test2", Price: 2, Actions: []string{"Buy", "Sell"}}
+	product3 := products.Product{ID: 3, Name: "test3", Description: "test3", Price: 3, Actions: []string{"Buy", "Sell"}}
 
 	sliceProducts := []products.Product{product1, product2, product3}
 
