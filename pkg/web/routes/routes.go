@@ -8,7 +8,7 @@ import (
 )
 
 // tmpl is a map of all the templates used in the application.
-var tmpl = template.Must(template.ParseGlob("templates/*.html"))
+var tmpl = template.Must(template.ParseGlob("pkg/web/templates/*.html"))
 
 // CallRoutes is the main function that handles all the routes
 func CallRoutes() {
