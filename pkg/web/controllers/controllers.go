@@ -12,27 +12,6 @@ import (
 // tmpl is a map of all the templates used in the application.
 var tmpl = template.Must(template.ParseGlob("pkg/web/templates/*.html"))
 
-//var SliceProducts []entity.Product
-//
-//// TODO: migrate this to a database.
-//func init() {
-//	product1 := entity.Product{
-//		ID:          1,
-//		Name:        "Product 1",
-//		Price:       10.00,
-//		Description: "This is a product",
-//		Actions:     []string{"buy", "sell"},
-//	}
-//	product2 := entity.Product{
-//		ID:          2,
-//		Name:        "Product 2",
-//		Price:       20.00,
-//		Description: "This is a product",
-//		Actions:     []string{"buy", "sell"},
-//	}
-//	SliceProducts = append(SliceProducts, product1, product2)
-//}
-
 // Index is the main page
 func Index(w http.ResponseWriter, r *http.Request) {
 
@@ -54,7 +33,7 @@ func New(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Insert get information from new page and insert
+// Insert get information from new page and call database
 func Insert(w http.ResponseWriter, r *http.Request) {
 
 	product := entity.Product{}
@@ -72,22 +51,7 @@ func Insert(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", 301)
 }
 
-//// CreateNewProduct save in slice
-//func CreateNewProduct(dv ,id int64, name string, price float64, description string) {
-//
-//	products := database.DataValues{}
-//
-//	p := entity.Product{
-//		ID:          id,
-//		Name:        name,
-//		Price:       price,
-//		Description: description,
-//		Actions:     []string{"save", "drop"},
-//	}
-//	products = append(products, p)
-//}
-
-// Edit New is form to new product
+// Edit is form to edit product
 func Edit(w http.ResponseWriter, r *http.Request) {
 
 	products := database.GetProducts()
@@ -115,7 +79,7 @@ func Edit(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Update get information from edit page and update
+// Update get information from edit page and call database
 func Update(w http.ResponseWriter, r *http.Request) {
 
 	product := entity.Product{}
@@ -143,20 +107,3 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "/", http.StatusFound)
 }
-
-//// DeleteProductSlice create a func remove Product when the button is clicked
-//// remove the product from the slice
-//// redirect to index
-//func DeleteProductSlice(id string) {
-//
-//	products := database.GetProducts()
-//
-//	for i, v := range products {
-//		// convert srtring to int64
-//		idInt, _ := strconv.ParseInt(id, 10, 64)
-//		if v.ID == idInt {
-//			log.Println("will be deleted", idInt)
-//			products = append(products[:i], products[i+1:]...)
-//		}
-//	}
-//}
