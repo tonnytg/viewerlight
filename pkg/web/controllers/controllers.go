@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"fmt"
-	"github.com/tonnytg/viewerlight/entity/products"
+	"github.com/tonnytg/viewerlight/entity/entity"
+	"github.com/tonnytg/viewerlight/pkg/database"
 	"html/template"
 	"log"
 	"net/http"
@@ -12,159 +12,154 @@ import (
 // tmpl is a map of all the templates used in the application.
 var tmpl = template.Must(template.ParseGlob("pkg/web/templates/*.html"))
 
-var SliceProducts []products.Product
-
-func init() {
-	product1 := products.Product{
-		ID:          1,
-		Name:        "Product 1",
-		Price:       10.00,
-		Description: "This is a product",
-		Actions: []string{"buy", "sell"},
-	}
-	product2 := products.Product{
-		ID:          2,
-		Name:        "Product 2",
-		Price:       20.00,
-		Description: "This is a product",
-		Actions: []string{"buy", "sell"},
-	}
-	SliceProducts = append(SliceProducts, product1, product2)
-}
+//var SliceProducts []entity.Product
+//
+//// TODO: migrate this to a database.
+//func init() {
+//	product1 := entity.Product{
+//		ID:          1,
+//		Name:        "Product 1",
+//		Price:       10.00,
+//		Description: "This is a product",
+//		Actions:     []string{"buy", "sell"},
+//	}
+//	product2 := entity.Product{
+//		ID:          2,
+//		Name:        "Product 2",
+//		Price:       20.00,
+//		Description: "This is a product",
+//		Actions:     []string{"buy", "sell"},
+//	}
+//	SliceProducts = append(SliceProducts, product1, product2)
+//}
 
 // Index is the main page
 func Index(w http.ResponseWriter, r *http.Request) {
 
-	log.Println("Index access")
+	products := database.DataValues{}
+	products.StartInitialValues()
 
-	err := tmpl.ExecuteTemplate(w, "index.html", SliceProducts)
+	err := tmpl.ExecuteTemplate(w, "index.html", products.SliceProducts)
 	if err != nil {
-		log.Printf("Error executing t: %v", err)
+		log.Printf("Error executing template: %v", err)
 		return
 	}
 }
 
 // New is form to new product
 func New(w http.ResponseWriter, r *http.Request) {
-	tmpl.ExecuteTemplate(w, "New", nil)
+	err := tmpl.ExecuteTemplate(w, "New", nil)
+	if err != nil {
+		log.Printf("Error executing template: %v", err)
+		return
+	}
 }
 
+// Insert get information from new page and insert
 func Insert(w http.ResponseWriter, r *http.Request) {
+
+	product := entity.Product{}
+
 	if r.Method == "POST" {
-		id := r.FormValue("id")
-		name := r.FormValue("name")
-		description := r.FormValue("description")
-		price := r.FormValue("price")
+		product.ID, _ = strconv.ParseInt(r.FormValue("id"), 10, 64)
+		product.Name = r.FormValue("name")
+		product.Description = r.FormValue("description")
+		product.Price, _ = strconv.ParseFloat(r.FormValue("price"), 64)
 
-		priceConvertToFloat, err := strconv.ParseFloat(price, 64)
-		if err != nil {
-			log.Println("Erro na conversão do preço:", err)
-		}
+		log.Println("Values:", product)
 
-		idInt, _ := strconv.ParseInt(id, 10, 64)
-		if err != nil {
-			log.Println("Error ID convert:", err)
-		}
-
-		CreateNewProduct(idInt, name, priceConvertToFloat, description)
-
-		log.Println("Dados:", name, description, price, priceConvertToFloat)
 	}
 	http.Redirect(w, r, "/", 301)
 }
 
-func Update(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "POST" {
-		id := r.FormValue("id")
-		name := r.FormValue("name")
-		description := r.FormValue("description")
-		price := r.FormValue("price")
-
-		priceConvertToFloat, err := strconv.ParseFloat(price, 64)
-		if err != nil {
-			log.Println("Error PRICE convert:", err)
-		}
-
-		idInt, _ := strconv.ParseInt(id, 10, 64)
-		if err != nil {
-			log.Println("Error ID convert:", err)
-		}
-		for i, v := range SliceProducts {
-			if v.ID == idInt {
-				SliceProducts[i] = products.Product{
-					ID:          idInt,
-					Name:        name,
-					Price:       priceConvertToFloat,
-					Description: description,
-					Actions:     []string{"save", "drop"},
-				}
-				break
-			}
-		}
-
-		log.Println("Dados atualizados:", name, description, price, priceConvertToFloat)
-	}
-	http.Redirect(w, r, "/", 301)
-}
-
-// CreateNewProduct save
-func CreateNewProduct(id int64, nome string, preco float64, descricao string) {
-
-	p := products.Product{
-		ID:          id,
-		Name:        nome,
-		Price:       preco,
-		Description: descricao,
-		Actions:     []string{"save", "drop"},
-	}
-	SliceProducts = append(SliceProducts, p)
-}
+//// CreateNewProduct save in slice
+//func CreateNewProduct(dv ,id int64, name string, price float64, description string) {
+//
+//	products := database.DataValues{}
+//
+//	p := entity.Product{
+//		ID:          id,
+//		Name:        name,
+//		Price:       price,
+//		Description: description,
+//		Actions:     []string{"save", "drop"},
+//	}
+//	products = append(products, p)
+//}
 
 // Edit New is form to new product
 func Edit(w http.ResponseWriter, r *http.Request) {
+
+	dv := database.DataValues{}
+
 	id := r.FormValue("id")
 	var indice int
 	idInt, _ := strconv.ParseInt(id, 10, 64)
-	for i, v := range SliceProducts {
-        if v.ID == idInt {
+	for i, v := range dv.SliceProducts {
+		if v.ID == idInt {
 			indice = i
-			SliceProducts[i] = products.Product{
+			dv.SliceProducts[i] = entity.Product{
 				ID:          v.ID,
-                Name:        v.Name,
-                Price:       v.Price,
-                Description: v.Description,
-                Actions:     []string{"save", "drop"},
+				Name:        v.Name,
+				Price:       v.Price,
+				Description: v.Description,
+				Actions:     []string{"save", "drop"},
 			}
 			break
-        }
-    }
-	tmpl.ExecuteTemplate(w, "Edit", SliceProducts[indice])
+		}
+	}
+	err := tmpl.ExecuteTemplate(w, "Edit", dv.SliceProducts[indice])
+	if err != nil {
+		log.Printf("Error executing template: %v", err)
+		return
+	}
+}
+
+// Update get information from edit page and update
+func Update(w http.ResponseWriter, r *http.Request) {
+
+	product := entity.Product{}
+	dv := database.DataValues{}
+
+	if r.Method == "POST" {
+		product.ID, _ = strconv.ParseInt(r.FormValue("id"), 10, 64)
+		product.Name = r.FormValue("name")
+		product.Description = r.FormValue("description")
+		product.Price, _ = strconv.ParseFloat(r.FormValue("price"), 64)
+
+		dv.UpdateProduct(product)
+	}
+	http.Redirect(w, r, "/", 301)
 }
 
 // Delete remove a product
 func Delete(w http.ResponseWriter, r *http.Request) {
 
-	log.Println("delete access")
+	dv := database.DataValues{}
 
 	id := r.URL.Query().Get("id")
 	if id == "" {
-		fmt.Fprint(w, "No id provided")
+		http.Redirect(w, r, "/", http.StatusBadRequest)
 		return
 	}
-	DeleteProductSlice(id)
+	dv.DeleteProduct(id)
 
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
-// DeleteProductSlice create a func remove Product when the button is clicked
-// remove the product from the slice
-// redirect to index
-func DeleteProductSlice(id string) {
-	for i, v := range SliceProducts {
-		// convert srtring to int64
-		idInt, _ := strconv.ParseInt(id, 10, 64)
-		if v.ID == idInt {
-			SliceProducts = append(SliceProducts[:i], SliceProducts[i+1:]...)
-		}
-	}
-}
+//// DeleteProductSlice create a func remove Product when the button is clicked
+//// remove the product from the slice
+//// redirect to index
+//func DeleteProductSlice(id string) {
+//
+//	products := database.GetProducts()
+//
+//	for i, v := range products {
+//		// convert srtring to int64
+//		idInt, _ := strconv.ParseInt(id, 10, 64)
+//		if v.ID == idInt {
+//			log.Println("will be deleted", idInt)
+//			products = append(products[:i], products[i+1:]...)
+//		}
+//	}
+//}
