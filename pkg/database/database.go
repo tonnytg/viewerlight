@@ -6,11 +6,9 @@ import (
 	"strconv"
 )
 
-type DataValues struct {
-	SliceProducts []entity.Product
-}
+var dataProduct []entity.Product
 
-func (dv *DataValues) StartInitialValues() {
+func init() {
 
 	product1 := entity.Product{
 		ID:          1,
@@ -26,23 +24,29 @@ func (dv *DataValues) StartInitialValues() {
 		Description: "This is a product",
 		Actions:     []string{"buy", "sell"},
 	}
-
-	dv.SliceProducts = append(dv.SliceProducts, product1, product2)
+	product3 := entity.Product{
+		ID:          3,
+		Name:        "Product 3",
+		Price:       30.00,
+		Description: "This is a product",
+		Actions:     []string{"buy", "sell"},
+	}
+	dataProduct = append(dataProduct, product1, product2, product3)
 }
 
-func (dv *DataValues) GetProducts() []entity.Product {
-	return dv.SliceProducts
+func GetProducts() []entity.Product {
+	return dataProduct
 }
 
-func (dv *DataValues) SaveProduct() {
-	dv.SliceProducts = append(dv.SliceProducts, entity.Product{})
+func  SaveProduct(p entity.Product) {
+	dataProduct = append(dataProduct, p)
 }
 
-func (dv *DataValues) UpdateProduct(p entity.Product) {
+func UpdateProduct(p entity.Product) {
 
-	for i, v := range dv.SliceProducts {
+	for i, v := range dataProduct {
 		if v.ID == p.ID {
-			dv.SliceProducts[i] = entity.Product{
+			dataProduct[i] = entity.Product{
 				ID:          p.ID,
 				Name:        p.Name,
 				Price:       p.Price,
@@ -54,17 +58,14 @@ func (dv *DataValues) UpdateProduct(p entity.Product) {
 	}
 }
 
-func (dv *DataValues) DeleteProduct(id string) {
+func DeleteProduct(id string) {
 
-	dv.SliceProducts = append(dv.SliceProducts, entity.Product{})
-
-	for i, v := range dv.SliceProducts {
+	for i, v := range dataProduct {
 		// convert srtring to int64
 		idInt, _ := strconv.ParseInt(id, 10, 64)
 		if v.ID == idInt {
 			log.Println("will be deleted", idInt)
-			dv.SliceProducts = append(dv.SliceProducts[:i], dv.SliceProducts[i+1:]...)
+			dataProduct = append(dataProduct[:i], dataProduct[i+1:]...)
 		}
 	}
-
 }

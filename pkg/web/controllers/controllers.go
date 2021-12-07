@@ -36,10 +36,9 @@ var tmpl = template.Must(template.ParseGlob("pkg/web/templates/*.html"))
 // Index is the main page
 func Index(w http.ResponseWriter, r *http.Request) {
 
-	products := database.DataValues{}
-	products.StartInitialValues()
+	products := database.GetProducts()
 
-	err := tmpl.ExecuteTemplate(w, "index.html", products.SliceProducts)
+	err := tmpl.ExecuteTemplate(w, "index.html", products)
 	if err != nil {
 		log.Printf("Error executing template: %v", err)
 		return
@@ -67,6 +66,7 @@ func Insert(w http.ResponseWriter, r *http.Request) {
 		product.Price, _ = strconv.ParseFloat(r.FormValue("price"), 64)
 
 		log.Println("Values:", product)
+		database.SaveProduct(product)
 
 	}
 	http.Redirect(w, r, "/", 301)
@@ -90,15 +90,15 @@ func Insert(w http.ResponseWriter, r *http.Request) {
 // Edit New is form to new product
 func Edit(w http.ResponseWriter, r *http.Request) {
 
-	dv := database.DataValues{}
+	products := database.GetProducts()
 
 	id := r.FormValue("id")
 	var indice int
 	idInt, _ := strconv.ParseInt(id, 10, 64)
-	for i, v := range dv.SliceProducts {
+	for i, v := range products {
 		if v.ID == idInt {
 			indice = i
-			dv.SliceProducts[i] = entity.Product{
+			products[i] = entity.Product{
 				ID:          v.ID,
 				Name:        v.Name,
 				Price:       v.Price,
@@ -108,7 +108,7 @@ func Edit(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
-	err := tmpl.ExecuteTemplate(w, "Edit", dv.SliceProducts[indice])
+	err := tmpl.ExecuteTemplate(w, "Edit", products[indice])
 	if err != nil {
 		log.Printf("Error executing template: %v", err)
 		return
@@ -119,7 +119,6 @@ func Edit(w http.ResponseWriter, r *http.Request) {
 func Update(w http.ResponseWriter, r *http.Request) {
 
 	product := entity.Product{}
-	dv := database.DataValues{}
 
 	if r.Method == "POST" {
 		product.ID, _ = strconv.ParseInt(r.FormValue("id"), 10, 64)
@@ -127,7 +126,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		product.Description = r.FormValue("description")
 		product.Price, _ = strconv.ParseFloat(r.FormValue("price"), 64)
 
-		dv.UpdateProduct(product)
+		database.UpdateProduct(product)
 	}
 	http.Redirect(w, r, "/", 301)
 }
@@ -135,14 +134,12 @@ func Update(w http.ResponseWriter, r *http.Request) {
 // Delete remove a product
 func Delete(w http.ResponseWriter, r *http.Request) {
 
-	dv := database.DataValues{}
-
 	id := r.URL.Query().Get("id")
 	if id == "" {
 		http.Redirect(w, r, "/", http.StatusBadRequest)
 		return
 	}
-	dv.DeleteProduct(id)
+	database.DeleteProduct(id)
 
 	http.Redirect(w, r, "/", http.StatusFound)
 }
